@@ -32,6 +32,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.SystemProperties;
 import android.telecom.CallAudioState;
 import android.telecom.Log;
 import android.telecom.Logging.Session;
@@ -1863,9 +1864,19 @@ public class CallAudioRouteStateMachine extends StateMachine {
 
     private boolean checkForEarpieceSupport() {
         AudioDeviceInfo[] deviceList = mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
-        for (AudioDeviceInfo device: deviceList) {
-            if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE) {
-                return true;
+        boolean noearpiece = SystemProperties.getBoolean("org.lineageos.noearpiece", false);
+        if (noearpiece)
+        {
+        // If the property is set to "true", it means no earpiece support
+        // Return false to indicate no earpiece support
+            return false;
+        }
+        else
+        {
+            for (AudioDeviceInfo device: deviceList) {
+                if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE) {
+                    return true;
+                }
             }
         }
         // No earpiece found
